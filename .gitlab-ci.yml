@@ -1,0 +1,49 @@
+.before_script_develop:
+   before_script:
+     - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )'
+     - eval $(ssh-agent -s)
+     - echo "$DEV_SSH_KEY" | tr -d '\r' | ssh-add -
+     - mkdir -p ~/.ssh
+     - chmod 700 ~/.ssh
+     - ssh-keyscan "$DEV_SERVER" >> ~/.ssh/known_hosts
+     - chmod 644 ~/.ssh/known_hosts
+
+.before_script_master:
+   before_script:
+     - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )'
+     - eval $(ssh-agent -s)
+     - echo "$PRODUCTION_SSH_KEY" | tr -d '\r' | ssh-add -
+     - mkdir -p ~/.ssh
+     - chmod 700 ~/.ssh
+     - ssh-keyscan "$PRODUCTION_SERVER" >> ~/.ssh/known_hosts
+     - chmod 644 ~/.ssh/known_hosts
+
+stages:
+  - production
+  - develop
+
+pull_on_develop:
+  extends: .before_script_develop
+  stage: develop
+  script:
+    - echo "Enviando los cambios a produccion..."
+    - ssh -o StrictHostKeyChecking=no "$DEV_SSH_USER"@"$DEV_SERVER" "source .bashrc && cd /var/www/mi-viajero/microservices/mi-viajero-ms-security/ && git checkout . && git pull origin develop && nvm use v20.12.2 && npm install && npm run build && pm2 restart mi-viajero-ms-security"
+  except: 
+    changes:
+      - ".gitignore"
+      - ".gitlab-ci.yml"
+  only:
+    - develop
+
+pull_on_master:
+  extends: .before_script_master
+  stage: production
+  script:
+    - echo "Enviando los cambios a produccion..."
+    - ssh -o StrictHostKeyChecking=no "$PRODUCTION_SSH_USER"@"$PRODUCTION_SERVER" "source .bashrc && cd /var/www/mi-viajero/microservices/mi-viajero-ms-security/ && git checkout . && git pull origin develop && nvm use v20.12.2 && npm install && npm run build && pm2 restart mi-viajero-ms-security"
+  except: 
+    changes:
+      - ".gitignore"
+      - ".gitlab-ci.yml"
+  only:
+    - main

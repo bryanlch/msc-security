@@ -1,0 +1,93 @@
+export enum ResponseAPI {
+  CREATE_SUCCESSFUL = 'Proceso creado correctamente',
+  UPDATE_SUCCESSFUL = 'Proceso actualizado correctamente',
+  NOT_CREATE = 'El proceso no se guardo correctamente',
+  ERROR_SIGN_IN = 'Error al iniciar sesión',
+  SIGN_OUT_SUCCESSFUL = 'Cerrar sesión del usuario',
+  NOT_FOUND = 'Los datos ingresados son incorrectos, por favor intente nuevamente.',
+  INVALID_PASS = 'Contraseña invalida.',
+  DELETED_SUCCESSFUL = 'Registro eliminado correctamente',
+  ERROR_PROCESS = 'Error al procesar la solicitud',
+  NAME_USE = 'Este nombre ya esta siendo usado',
+
+  //user
+  USER_INACTIVE = 'El usuario ingresado se encuentra inactivo. Comuníquese con el Administrador.',
+  USER_VERIFIED = 'El usuario ya ha sido verificado',
+  USER_NOT_VERIFIED = 'El usuario no ha sido verificado',
+  USER_PASSWORD_EMAIL = 'El correo o contraseña son incorrecta',
+  USER_EXIST = 'Usuario ya existe',
+  USER_ROLE_ASSIGN = 'Este rol esta asignado a un usuario',
+  USER_LOGIN = 'Usuario ya tiene la session activa',
+  USER_INVALID = 'Usuario no aceptado',
+  USER_DELETE_ERROR = 'Error al eliminar el usuario',
+  USER_EMAIL_EXIST = 'El correo ya esta registrado',
+  USER_LIST = 'Lista de usuarios',
+  USER_LIST_ERROR = 'Error al listar los usuarios',
+  USER_CREATED = 'El usuario se ha creado correctamente',
+  USER_CREATED_ERROR = 'Error al crear el usuario',
+  USER_UPDATED = 'Usuario actualizado correctamente',
+  USER_DELETED = 'Usuario eliminado correctamente',
+  USER_NOT_FOUND = 'Usuario no encontrado',
+  USER_FOUND = 'Usuario encontrado',
+  USER_NOT_FOUND_ALL = 'Algunos de los usuarios no existen',
+  USER_EXISTS_ALL = 'Algunos de los usuarios ya existen',
+  USER_UPDATED_ERROR = 'Error al actualizar el usuario',
+  USER_NOT_FOUND_EMAIL = 'Usuario no encontrado con este correo',
+  RESCUES_PASSWORD = 'Se ha enviado un correo electrónico con las instrucciones para restablecer su contraseña.',
+  RECOVERY_PASSWORD = 'Se ha cambiado la contraseña exitosamente',
+  VERIFY_ACCOUNT = 'Cuenta Verificada correctamente',
+
+  //module
+  ERROR_CREATE_MODULE = 'Error al crear el modulo',
+  MISSING_FIELDS = 'Faltan campos obligatorios',
+  MODULE_EXISTS = 'El modulo ya existe',
+
+  //action
+  ACTION_NOT_FOUND = 'La acción no existe',
+  ACTION_EXISTS = 'La acción ya existe',
+  ACTION_CREATED = 'Acción creada correctamente',
+  ACTION_UPDATED = 'Acción actualizada correctamente',
+  ACTION_DELETED = 'Acción eliminada correctamente',
+  ACTION_EXISTS_ALL = 'Alguna de las acciones ya existe',
+  ACTION_NOT_FOUND_ALL = 'Alguna de las acciones no existe',
+
+  // Role
+  ROLE_EXISTS = 'El rol ya existe',
+  ROLE_CREATED = 'Rol creado correctamente',
+  ROLE_UPDATED = 'Rol actualizado correctamente',
+  ROLE_DELETED = 'Rol eliminado correctamente',
+  ROLE_NOT_FOUND = 'El rol no existe',
+  REQUIRED_ROL_ID = 'El id del rol es requerido',
+  ROLE_UPDATED_ERROR = 'Error al actualizar el rol',
+  ROLE_UPSERT_ERROR = 'Error al crear o actualizar el rol',
+  ROLE_FOUND = 'Rol encontrado',
+  ROLE_NAME_EXISTS = 'El nombre del rol ya existe',
+
+  //item
+  ITEMS_FOUND = 'Items encontrados',
+  ITEM_FOUND = 'Item encontrado',
+  ITEM_NOT_FOUND = 'Item no encontrado',
+
+  //permission
+  PERMISSION_CREATE_ERROR = 'Error al crear el permiso',
+  PERMISSION_EXISTS = 'El permiso ya existe',
+  PERMISSION_NOT_FOUND = 'Permiso no encontrado',
+  PERMISSIONS_NOT_FOUND = 'Permisos no encontrados',
+  PERMISSIONS_FOUND = 'Permisos encontrados',
+  PERMISSION_FOUND = 'Permiso encontrado',
+  PERMISSION_CREATE_SUCCESSFUL = 'Permiso creado correctamente',
+  PERMISSION_DELETE_SUCCESSFUL = 'Permiso eliminado correctamente',
+  PERMISSION_UPDATE_SUCCESSFUL = 'Permiso actualizado correctamente',
+  PASSWORD_WEAK = 'La contraseña debe tener al menos 8 caracteres',
+
+  //MODULE
+  MODULE_ERROR_LIST = 'Error al listar los modulos',
+  MODULE_ERROR_UPDATE = 'Error al actualizar el modulo',
+  MODULE_ERROR_DELETE = 'Error al eliminar el modulo',
+  MODULE_ERROR_FIND = 'Error al buscar el modulo',
+  MODULE_ERROR_NOT_FOUND = 'Modulo no encontrado',
+  MODULE_ERROR_EXISTS = 'El modulo ya existe',
+  MODULE_LIST = 'Lista de modulos',
+
+  ERROR_PUBLIC_KEY = 'Error al obtener la clave pública',
+}
