@@ -88,7 +88,7 @@ export class KeyService implements OnApplicationBootstrap {
 
       return { data: desencrytPassword.toString(), error: null };
     } catch (error) {
-      console.log('🚀 ~ Error ~ KeyService ~ desencrytPassword:', error);
+      console.error('🚀 ~ Error ~ KeyService ~ desencrytPassword:', error);
       return { data: null, error: KeyMessages.PASSWORD_DECRYPTION_FAILED };
     }
   }

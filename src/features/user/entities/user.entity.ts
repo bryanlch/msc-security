@@ -1,4 +1,4 @@
-import { Role } from 'src/features/role/entities/role.entity';
+import { RolesEntity } from 'src/features/role/entities/role.entity';
 import {
   Entity,
   Column,
@@ -6,11 +6,11 @@ import {
   UpdateDateColumn,
   CreateDateColumn,
   ManyToOne,
-  JoinColumn,
+  Relation,
 } from 'typeorm';
 
 @Entity('users')
-export class User {
+export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -35,9 +35,8 @@ export class User {
   @Column({ nullable: false })
   verifyAccount: boolean;
 
-  @ManyToOne(() => Role, (rol) => rol.id)
-  @JoinColumn({ name: 'rolId' })
-  role: Role[];
+  @ManyToOne(() => RolesEntity, (rol) => rol.users)
+  role: Relation<RolesEntity>;
 
   @CreateDateColumn({
     type: 'datetime',

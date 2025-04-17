@@ -15,7 +15,7 @@ export class UpdateRoleDto {
     description: 'The role status',
   })
   @IsNotEmpty()
-  status?: boolean;
+  status?: 'ACTIVE' | 'INACTIVE';
 
   @ApiProperty({
     example: 1,

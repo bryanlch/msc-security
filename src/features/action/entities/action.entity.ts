@@ -1,21 +1,28 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
-import { Modules } from 'src/features/module/entities/module.entity';
-import { Permission } from 'src/features/permissions/entities/permission.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+  Relation,
+} from 'typeorm';
+import { ModulesEntity } from 'src/features/module/entities/module.entity';
+import { PermissionsEntity } from 'src/features/permissions/entities/permission.entity';
 
 @Entity('action')
-export class Action {
-     @PrimaryGeneratedColumn()
-     id: number;
+export class ActionsEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-     @Column()
-     moduleId: number;
+  @Column()
+  moduleId: number;
 
-     @Column({ enum: ['READ', 'WRITE', 'DELETE'] })
-     action: string;
+  @Column({ enum: ['READ', 'WRITE', 'DELETE'] })
+  action: string;
 
-     @ManyToOne(() => Modules, (module) => module.action)
-     module: Modules;
+  @ManyToOne(() => ModulesEntity, (module) => module.action)
+  module: Relation<ModulesEntity>;
 
-     @OneToMany(() => Permission, (permission) => permission.actionId)
-     permission: Permission[];
+  @OneToMany(() => PermissionsEntity, (permission) => permission.actionId)
+  permission: Relation<PermissionsEntity[]>;
 }

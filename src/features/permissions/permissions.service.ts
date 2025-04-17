@@ -1,24 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
-import { Role } from '../role/entities/role.entity';
-import { Permission } from './entities/permission.entity';
-import { Action } from '../action/entities/action.entity';
+import { Repository } from 'typeorm';
+import { PermissionsEntity } from './entities/permission.entity';
 import { ResponseAPI } from 'src/enums/responses.enum';
+import { RolesStatus } from '../role/dto/create-role.dto';
+import { ActionService } from '../action/action.service';
+import { RoleService } from '../role/role.service';
+import { WrapperType } from 'src/commons/wrapper-types';
 
 @Injectable()
 export class PermissionsService {
   constructor(
-    @InjectRepository(Permission)
-    private readonly permissionRepository: Repository<Permission>,
+    @InjectRepository(PermissionsEntity)
+    private readonly permissionRepository: Repository<PermissionsEntity>,
 
-    @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>,
+    @Inject(forwardRef(() => RoleService))
+    private readonly roleService: WrapperType<RoleService>,
 
-    @InjectRepository(Action)
-    private readonly actionRepository: Repository<Action>,
+    @Inject(forwardRef(() => ActionService))
+    private readonly actionsService: WrapperType<ActionService>,
   ) {}
 
   async create(createPermissionDto: CreatePermissionDto) {
@@ -26,15 +28,11 @@ export class PermissionsService {
       const { actions, rolId } = createPermissionDto;
 
       const actionIds = actions.map((action) => action.id);
-      const actionsExists = await this.actionRepository.find({
-        where: { id: In(actionIds) },
-        relations: ['module.parentModule.action'],
-      });
+      const actionsExists = await this.actionsService.findByIds(actionIds);
       if (!actionsExists.length) {
         throw new Error(ResponseAPI.ACTION_NOT_FOUND_ALL);
       }
 
-      //Validar que las acciones recibidas si existan
       actionsExists.forEach((act) => {
         const exists = actions.some((action) => action.id === act.id);
         if (!exists) {
@@ -87,10 +85,7 @@ export class PermissionsService {
       const { actions } = updatePermissionDto;
 
       const actionIds = actions.map((action) => action.id);
-      const actionsRecive = await this.actionRepository.find({
-        where: { id: In(actionIds) },
-        relations: ['module.parentModule.action'],
-      });
+      const actionsRecive = await this.actionsService.findByIds(actionIds);
       if (!actionsRecive.length) {
         throw new Error(ResponseAPI.ACTION_NOT_FOUND_ALL);
       }
@@ -217,7 +212,7 @@ export class PermissionsService {
       });
 
       if (!permission.length) {
-        const rol = await this.roleRepository.findOne({ where: { id } });
+        const rol = await this.roleService.findOne(id);
         return rol;
       }
 
@@ -242,7 +237,7 @@ export class PermissionsService {
       const grouped = await this.groupedRoleModule(permission);
 
       if (!grouped.length) {
-        const rol = await this.roleRepository.findOne({ where: { id } });
+        const rol = await this.roleService.findOne(id);
         return {
           rolId: rol.id,
           name: rol.name,
@@ -259,16 +254,13 @@ export class PermissionsService {
   async update(id: number, updatePermissionDto: UpdatePermissionDto) {
     try {
       const { actions } = updatePermissionDto;
-      const roleExists = await this.roleRepository.findOne({ where: { id } });
+      const roleExists = await this.roleService.findOne(id);
       if (!roleExists) {
         throw new Error(ResponseAPI.ROLE_NOT_FOUND);
       }
 
       const actionIds = actions.map((action) => action.id);
-      const actionsRecive = await this.actionRepository.find({
-        where: { id: In(actionIds) },
-        relations: ['module.parentModule.action'],
-      });
+      const actionsRecive = await this.actionsService.findByIds(actionIds);
       if (!actionsRecive.length) {
         throw new Error(ResponseAPI.ACTION_NOT_FOUND_ALL);
       }
@@ -363,9 +355,10 @@ export class PermissionsService {
 
   async findRolById(id: number) {
     try {
-      const rolAcive = await this.roleRepository.findOne({
-        where: { id, status: true },
-      });
+      const rolAcive = await this.roleService.findOne(id, RolesStatus.ACTIVE);
+      if (!rolAcive) {
+        throw new Error(ResponseAPI.ROLE_NOT_FOUND);
+      }
       return rolAcive;
     } catch (error) {
       throw new Error(error);

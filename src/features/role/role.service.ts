@@ -1,22 +1,26 @@
-import { Injectable } from '@nestjs/common';
-import { CreateRoleDto } from './dto/create-role.dto';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { CreateRoleDto, QueryRole, RolesStatus } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { Role } from './entities/role.entity';
-import { Like, Repository } from 'typeorm';
+import { RolesEntity } from './entities/role.entity';
+import { UserEntity } from '../user/entities/user.entity';
+import { Like, Relation, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ResponseAPI } from 'src/enums/responses.enum';
-import { User } from '../user/entities/user.entity';
 import { PermissionsService } from '../permissions/permissions.service';
+import { UserService } from '../user/user.service';
+import { WrapperType } from 'src/commons/wrapper-types';
 
 @Injectable()
 export class RoleService {
   constructor(
-    @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>,
+    @InjectRepository(RolesEntity)
+    private readonly roleRepository: Repository<RolesEntity>,
 
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    private readonly permissionsService: PermissionsService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: WrapperType<UserService>,
+
+    @Inject(forwardRef(() => PermissionsService))
+    private readonly permissionsService: WrapperType<PermissionsService>,
   ) {}
 
   async create(createRoleDto: CreateRoleDto) {
@@ -77,7 +81,7 @@ export class RoleService {
     try {
       const roles = await this.roleRepository.findAndCount({
         where: {
-          status: true,
+          status: RolesStatus.ACTIVE,
         },
         order: {
           name: 'ASC',
@@ -124,13 +128,23 @@ export class RoleService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, sratus?: RolesStatus) {
     try {
-      const role = await this.roleRepository.findOne({
+      const query: QueryRole = {
         where: { id },
-        select: ['id', 'name', 'status'],
+        select: {
+          id: true,
+          name: true,
+          status: true,
+        },
         cache: true,
-      });
+      };
+
+      if (sratus) {
+        query.where = { id, status: sratus };
+      }
+
+      const role = await this.roleRepository.findOne(query);
       if (!role) {
         throw new Error(ResponseAPI.ROLE_NOT_FOUND);
       }
@@ -145,7 +159,7 @@ export class RoleService {
     }
   }
 
-  async updateStatusRole(id: number, status: boolean) {
+  async updateStatusRole(id: number, status: RolesStatus) {
     try {
       const role = await this.roleRepository.findOne({ where: { id } });
       if (!role) {
@@ -165,9 +179,7 @@ export class RoleService {
         throw new Error(ResponseAPI.NOT_FOUND);
       }
 
-      const roleWithUser = await this.userRepository.find({
-        where: { rolId: id },
-      });
+      const roleWithUser = await this.userService.findByRolId(id);
       if (roleWithUser && roleWithUser.length > 0) {
         throw new Error(ResponseAPI.USER_ROLE_ASSIGN);
       }

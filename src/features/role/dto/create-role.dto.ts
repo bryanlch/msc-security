@@ -17,7 +17,7 @@ export class CreateRoleDto {
   @IsNotEmpty({
     message: 'El estado es requerido',
   })
-  status: boolean;
+  status: 'ACTIVE' | 'INACTIVE';
 
   @ApiProperty({
     example: 1,
@@ -25,4 +25,15 @@ export class CreateRoleDto {
   })
   @IsOptional()
   permissions: Action[];
+}
+
+export enum RolesStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+}
+
+export interface QueryRole {
+  where: { id: number; status?: RolesStatus };
+  select: { id: boolean; name: boolean; status: boolean };
+  cache: boolean;
 }

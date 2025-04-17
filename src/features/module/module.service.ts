@@ -1,20 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateModuleDto } from './dto/create-module.dto';
 import { UpdateModuleDto } from './dto/update-module.dto';
 import { IsNull, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Modules } from './entities/module.entity';
-import { Action } from '../action/entities/action.entity';
+import { ModulesEntity } from './entities/module.entity';
+import { ActionsEntity } from '../action/entities/action.entity';
 import { ResponseAPI } from 'src/enums/responses.enum';
+import { ActionService } from '../action/action.service';
+import { WrapperType } from 'src/commons/wrapper-types';
 
 @Injectable()
 export class ModuleService {
   constructor(
-    @InjectRepository(Modules)
-    private readonly moduleRepository: Repository<Modules>,
+    @InjectRepository(ModulesEntity)
+    private readonly moduleRepository: Repository<ModulesEntity>,
 
-    @InjectRepository(Action)
-    private readonly actionRepository: Repository<Action>,
+    @Inject(forwardRef(() => ActionService))
+    private readonly actionService: WrapperType<ActionService>,
   ) {}
 
   async create(createModuleDto: CreateModuleDto) {
@@ -35,15 +37,13 @@ export class ModuleService {
       );
       await this.moduleRepository.save(newModule);
 
-      const actions = createModuleDto.actions.map((action) => {
-        const newAction = this.actionRepository.create({
-          moduleId: newModule.id,
-          action: action.action,
-        });
-        return newAction;
-      });
+      const arrayActions = createModuleDto.actions.map((action) => ({
+        moduleId: newModule.id,
+        action: action.action,
+      }));
 
-      await this.actionRepository.save(actions);
+      const actions = await this.actionService.createBulk(arrayActions);
+
       return {
         ...newModule,
         actions,
@@ -88,7 +88,7 @@ export class ModuleService {
     }
   }
 
-  private orderActions(actions: Action[]) {
+  private orderActions(actions: ActionsEntity[]) {
     const actionOrder = {
       READ: 1,
       CREATE: 2,
@@ -137,14 +137,14 @@ export class ModuleService {
       const newActions = updateModuleDto.actions
         .filter((atn) => !existingActions.has(atn.action))
         .map((atn) => ({ moduleId: module.id, action: atn.action }));
-      await this.actionRepository.insert(newActions);
+      await this.actionService.createBulk(newActions);
 
       const deleteActions = action.filter(
         (act) =>
           !updateModuleDto.actions.find((atn) => atn.action === act.action),
       );
 
-      await this.actionRepository.remove(deleteActions);
+      await this.actionService.removeBulk(deleteActions);
 
       return {
         module: updateModuleDto.module,
@@ -166,7 +166,7 @@ export class ModuleService {
       }
 
       if (action && action.length > 0) {
-        await this.actionRepository.remove(action);
+        await this.actionService.removeByModuleId(id);
       }
 
       await this.moduleRepository.delete(id);

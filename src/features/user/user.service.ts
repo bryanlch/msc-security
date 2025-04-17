@@ -1,9 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
-import { User } from './entities/user.entity';
+import { UserEntity } from './entities/user.entity';
 import { LogInDto } from './dto/logIn.dto';
 import { ResponseAPI } from 'src/enums/responses.enum';
 import { LogUpDto } from './dto/logUp.dto';
@@ -13,18 +18,22 @@ import { ListUserDto } from './dto/list.dto';
 import { ProducerService } from 'src/communications/producer/producer.service';
 import { ConsumerService } from 'src/communications/consumer/consumer.service';
 import * as bcrypt from 'bcryptjs';
-import { KeyService } from '../key/key.service';
+import { KeyService } from '../keys/key.service';
+import { WrapperType } from 'src/commons/wrapper-types';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    private jwtService: JwtService,
-    private readonly permissionsService: PermissionsService,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+
+    @Inject(forwardRef(() => PermissionsService))
+    private readonly permissionsService: WrapperType<PermissionsService>,
+
     private readonly producerService: ProducerService,
     private readonly consumerService: ConsumerService,
     private readonly keyService: KeyService,
+    private readonly jwtService: JwtService,
   ) {}
 
   private async validateUserDuplicate(email: string) {
@@ -446,6 +455,18 @@ export class UserService {
         { email: userInfo.recovery.email },
         { verifyAccount: true },
       );
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async findByRolId(rolId: number) {
+    try {
+      const users = await this.userRepository.find({
+        where: { rolId },
+        select: ['id', 'name', 'lastName', 'email', 'rolId', 'status'],
+      });
+      return users;
     } catch (error) {
       throw new Error(error);
     }

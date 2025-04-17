@@ -1,15 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ConsumerService {
   private readonly redisClient: Redis;
 
-  constructor() {
-    this.redisClient = new Redis({
-      host: 'localhost',
-      port: 6379,
-    });
+  constructor(private configService: ConfigService) {
+    const redisEnabled = configService.get('REDIS_ENABLED') === 'true';
+
+    if (redisEnabled) {
+      this.redisClient = new Redis({
+        host: configService.get('REDIS_HOST'),
+        port: configService.get('REDIS_PORT'),
+      });
+    }
   }
 
   async searchQueu(uuid: string, streamName) {

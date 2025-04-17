@@ -1,35 +1,30 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { RoleService } from './role.service';
 import { RoleController } from './role.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Role } from './entities/role.entity';
+import { RolesEntity } from './entities/role.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConfig } from 'src/config/jwt/jwt.config';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from 'src/guards/auth/auth.guard';
-import { User } from '../user/entities/user.entity';
-import { Permission } from '../permissions/entities/permission.entity';
-import { Action } from '../action/entities/action.entity';
-import { PermissionsService } from '../permissions/permissions.service';
+import { UserModule } from '../user/user.module';
+import { PermissionsModule } from '../permissions/permissions.module';
 
 @Module({
   imports: [
     JwtModule.registerAsync(jwtConfig),
-    TypeOrmModule.forFeature([
-      Role,
-      User,
-      Permission,
-      Action
-    ])
+    TypeOrmModule.forFeature([RolesEntity]),
+    forwardRef(() => UserModule),
+    forwardRef(() => PermissionsModule),
   ],
   controllers: [RoleController],
   providers: [
     RoleService,
-    PermissionsService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
   ],
+  exports: [RoleService],
 })
-export class RoleModule { }
+export class RoleModule {}

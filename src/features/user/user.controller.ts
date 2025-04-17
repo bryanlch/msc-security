@@ -22,7 +22,7 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LogUpDto } from './dto/logUp.dto';
 import { LogUpdateDto } from './dto/logUpdate.dto';
 import { ListUserDto } from './dto/list.dto';
-import { KeyService } from '../key/key.service';
+import { KeyService } from '../keys/key.service';
 
 @ApiTags('user')
 @Controller('user')

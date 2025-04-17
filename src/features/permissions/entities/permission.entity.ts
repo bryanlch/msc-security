@@ -4,12 +4,13 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  Relation,
 } from 'typeorm';
-import { Action } from 'src/features/action/entities/action.entity';
-import { Role } from 'src/features/role/entities/role.entity';
+import { ActionsEntity } from 'src/features/action/entities/action.entity';
+import { RolesEntity } from 'src/features/role/entities/role.entity';
 
 @Entity('permissions')
-export class Permission {
+export class PermissionsEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -19,10 +20,10 @@ export class Permission {
   @Column()
   actionId: number;
 
-  @ManyToOne(() => Role, (role) => role.permission)
+  @ManyToOne(() => RolesEntity, (role) => role.permission)
   @JoinColumn({ name: 'rolId' })
-  role: Role;
+  role: Relation<RolesEntity>;
 
-  @ManyToOne(() => Action, (action) => action.permission)
-  action: Action;
+  @ManyToOne(() => ActionsEntity, (action) => action.permission)
+  action: Relation<ActionsEntity>;
 }
